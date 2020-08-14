@@ -204,21 +204,10 @@ namespace SnakeWPF
                         //Console.WriteLine("GAME OVER!");
                         game = null;
                         MessageBox.Show("Game Over!\nPoints: " + points, "Snake Game");
-                        for(int i = 0; i < 10; i++)
-                        {
-                            if(points > records.ElementAt(i).points)
-                            {
-                                records.Insert(i, new Record("Player123", points, DateTime.Now));
-                                if(records.Count > 10)
-                                {
-                                    for(int j = 10; j < records.Count - 9; j++)
-                                    {
-                                        records.RemoveAt(j);
-                                    }
-                                }
-                                return;
-                            }
-                        }
+                        records.Add(new Record("Player123", points, DateTime.Now));
+                        records.Sort(new RecordsComparer());
+                        points = 0;
+                        pointsLabel.Content = "Points: " + points;
                         return;
                         //Application.Current.Shutdown();
                     }
@@ -280,9 +269,28 @@ namespace SnakeWPF
             Application.Current.Shutdown();
         }
 
-        private void mitFileRecords_Click(object sender, RoutedEventArgs e)
+        private void mitFileRecords_Click(object sender, RoutedEventArgs e) 
         {
-            //TODO
+            String msgBoxText = "";
+            foreach(Record record in records)
+            {
+                String date = "";
+                if(record.time.Day < 10) date += "0" + record.time.Day; else date += record.time.Day;
+                date += ".";
+                if(record.time.Month < 10) date += "0" + record.time.Month; else date += record.time.Month;
+                date += ".";
+                date += record.time.Year;
+
+                String time = "";
+                if(record.time.Hour < 10) time += "0" + record.time.Hour; else time += record.time.Hour;
+                time += ":";
+                if(record.time.Minute < 10) time += "0" + record.time.Minute; else time += record.time.Minute;
+                time += ":";
+                if(record.time.Second < 10) time += "0" + record.time.Second; else time += record.time.Second;
+
+                msgBoxText += record.playerName + " - " + record.points + "          " + date + " " + time + "\n";
+            }
+            MessageBox.Show(msgBoxText, "Records");
         }
     }
 
@@ -297,6 +305,16 @@ namespace SnakeWPF
             this.playerName = playerName;
             this.points = points;
             this.time = time;
+        }
+    }
+
+    public class RecordsComparer : IComparer<Record>
+    {
+        public int Compare(Record one, Record two)
+        {
+            if(one.points < two.points) return 1;
+            else if(one.points > two.points) return -1;
+            else return 0;
         }
     }
 }

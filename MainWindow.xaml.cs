@@ -16,7 +16,8 @@ using System.Numerics;
 using System.Threading;
 using System.Timers;
 using System.Windows.Threading;
-
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace SnakeWPF
 {
@@ -32,6 +33,8 @@ namespace SnakeWPF
         public static List<Record> records = new List<Record>();
         private Border[,] grdBoardBorders;
         private Label pointsLabel;
+        public static string recordsFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"SnakeGame/Records.dat");
+        public static string gameDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SnakeGame");
 
         public MainWindow()
         {
@@ -42,7 +45,7 @@ namespace SnakeWPF
         private void InitializeContent()
         {
             //boardSize = 20;
- 
+            
             // Main canvas
             Canvas cnvMain = new Canvas();
             cnvMain.Background = Brushes.Bisque;
@@ -70,6 +73,11 @@ namespace SnakeWPF
             mitFileRecords.Header = "_Records";
             mitFileRecords.Click += mitFileRecords_Click;
             mitFile.Items.Add(mitFileRecords);
+            
+            MenuItem mitFileClearRecords = new MenuItem();
+            mitFileClearRecords.Header = "_Clear Records";
+            mitFileClearRecords.Click += mitFileClearRecords_Click;
+            mitFile.Items.Add(mitFileClearRecords);
 
             MenuItem mitFileExit = new MenuItem();
             mitFileExit.Header = "_Exit";
@@ -135,6 +143,9 @@ namespace SnakeWPF
             keyboardTimer.Interval = TimeSpan.FromMilliseconds(1);
             keyboardTimer.Tick += keyboardTimerElaspsed; 
             keyboardTimer.Start();
+
+            if(!Directory.Exists(gameDir)) Directory.CreateDirectory(gameDir);
+            if(File.Exists(recordsFilePath)) deserializeRecords();
         }
 
         private void moveSnake()
@@ -208,6 +219,7 @@ namespace SnakeWPF
                         records.Sort(new RecordsComparer());
                         points = 0;
                         pointsLabel.Content = "Points: " + points;
+                        serializeRecords();
                         return;
                         //Application.Current.Shutdown();
                     }
@@ -221,6 +233,23 @@ namespace SnakeWPF
                     pointsLabel.Content = "Points: " + points;
                 }
             }
+        }
+
+        private void serializeRecords()
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream fileStream = new FileStream(recordsFilePath, FileMode.Create);
+            formatter.Serialize(fileStream, records);
+            fileStream.Close();
+        }
+
+        private void deserializeRecords()
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream fileStream = new FileStream(recordsFilePath, FileMode.Open);
+            records = formatter.Deserialize(fileStream) as List<Record>;
+            fileStream.Close();
+            
         }
 
         private void gameTimerElaspsed(object sender, EventArgs e)
@@ -292,8 +321,15 @@ namespace SnakeWPF
             }
             MessageBox.Show(msgBoxText, "Records");
         }
+
+        private void mitFileClearRecords_Click(object sender, RoutedEventArgs e) 
+        {
+            records.Clear();
+            serializeRecords();
+        }
     }
 
+    [Serializable]
     public class Record
     {
         public string playerName;

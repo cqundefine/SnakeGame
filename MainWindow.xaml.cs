@@ -35,6 +35,7 @@ namespace SnakeWPF
         private Label pointsLabel;
         public static string recordsFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"SnakeGame/Records.dat");
         public static string gameDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SnakeGame");
+        private static SettingsWindow setWindow = new SettingsWindow();
 
         public MainWindow()
         {
@@ -44,7 +45,7 @@ namespace SnakeWPF
 
         private void InitializeContent()
         {
-            //boardSize = 20;
+            Closed += windowClosed;
             
             // Main canvas
             Canvas cnvMain = new Canvas();
@@ -86,6 +87,7 @@ namespace SnakeWPF
 
             MenuItem mitSettings = new MenuItem();
             mitSettings.Header = "_Settings";
+            mitSettings.Click += mitFileSettings_Click;
             mnuTop.Items.Add(mitSettings); 
 
             // Grid with game board
@@ -330,6 +332,16 @@ namespace SnakeWPF
         {
             records.Clear();
             serializeRecords();
+        }
+   
+        private void mitFileSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if(setWindow.IsActive) setWindow.Close(); else setWindow.Show();
+        }
+    
+        private void windowClosed(object sender, EventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 

@@ -17,3 +17,5 @@ D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\SnakeWPF.cs
 D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\SnakeWPF.dll
 D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\SnakeWPF.pdb
 D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\SnakeWPF.genruntimeconfig.cache
+D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\SettingsWindow.g.cs
+D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\SettingsWindow.baml

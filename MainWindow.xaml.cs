@@ -217,6 +217,10 @@ namespace SnakeWPF
                         MessageBox.Show("Game Over!\nPoints: " + points, "Snake Game");
                         records.Add(new Record("Player123", points, DateTime.Now));
                         records.Sort(new RecordsComparer());
+                        while(records.Count > 10)
+                        {
+                            records.RemoveAt(records.Count-1);
+                        }
                         points = 0;
                         pointsLabel.Content = "Points: " + points;
                         serializeRecords();
@@ -319,7 +323,7 @@ namespace SnakeWPF
 
                 msgBoxText += record.playerName + " - " + record.points + "          " + date + " " + time + "\n";
             }
-            MessageBox.Show(msgBoxText, "Records");
+            MessageBox.Show(msgBoxText == "" ? "No Records" : msgBoxText, "Records");
         }
 
         private void mitFileClearRecords_Click(object sender, RoutedEventArgs e) 

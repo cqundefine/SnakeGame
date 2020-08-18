@@ -31,11 +31,17 @@ namespace SnakeWPF
         private static Random random = new Random();
         public static int points = 0;
         public static List<Record> records = new List<Record>();
-        private Border[,] grdBoardBorders;
+        private static Border[,] grdBoardBorders;
         private Label pointsLabel;
         public static string recordsFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"SnakeGame/Records.dat");
+        public static string settingsFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"SnakeGame/Settings.dat");
         public static string gameDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SnakeGame");
         private static SettingsWindow setWindow = new SettingsWindow();
+        private static Grid grdBoard;
+        public static int rowHeight = 10;
+        public static int colWidth = 10;
+        public static String playerName = "Player123";
+        private Menu mnuTop;
 
         public MainWindow()
         {
@@ -46,16 +52,17 @@ namespace SnakeWPF
         private void InitializeContent()
         {
             Closed += windowClosed;
-            
+            if(File.Exists(settingsFilePath)) deserializeSettings();        
+
             // Main canvas
             Canvas cnvMain = new Canvas();
             cnvMain.Background = Brushes.Bisque;
-            cnvMain.Width = winMain.Width;
+            //cnvMain.Width = winMain.Width;
             winMain.Content = cnvMain;
 
             // Menu
-            Menu mnuTop = new Menu();
-            mnuTop.Width = cnvMain.Width;
+            mnuTop = new Menu();
+            mnuTop.Width = Width;
             mnuTop.Height = 20;
             Canvas.SetTop(mnuTop, 0);
             Canvas.SetLeft(mnuTop, 0);
@@ -91,13 +98,10 @@ namespace SnakeWPF
             mnuTop.Items.Add(mitSettings); 
 
             // Grid with game board
-            Grid grdBoard = new Grid();
+            grdBoard = new Grid();
             Canvas.SetTop(grdBoard, mnuTop.Height);
             Canvas.SetLeft(grdBoard, 0);
             cnvMain.Children.Add(grdBoard);
-
-            const int rowHeight = 10;
-            const int colWidth = 10;
 
             RowDefinition[] grdBoardRows = new RowDefinition[Game.HEIGHT];
             for(int r = 0; r < Game.HEIGHT; ++r)
@@ -141,13 +145,49 @@ namespace SnakeWPF
             gameTimer.Tick += gameTimerElaspsed; 
             gameTimer.Start();
             
-            DispatcherTimer keyboardTimer = new DispatcherTimer();
-            keyboardTimer.Interval = TimeSpan.FromMilliseconds(1);
-            keyboardTimer.Tick += keyboardTimerElaspsed; 
-            keyboardTimer.Start();
+            DispatcherTimer updateTimer = new DispatcherTimer();
+            updateTimer.Interval = TimeSpan.FromMilliseconds(1);
+            updateTimer.Tick += updateTimerElaspsed; 
+            updateTimer.Start();
 
             if(!Directory.Exists(gameDir)) Directory.CreateDirectory(gameDir);
             if(File.Exists(recordsFilePath)) deserializeRecords();
+        }
+
+        public static void reInitGrid()
+        {
+            grdBoard.RowDefinitions.Clear();            
+            grdBoard.ColumnDefinitions.Clear();
+            grdBoard.Children.Clear();
+
+            RowDefinition[] grdBoardRows = new RowDefinition[Game.HEIGHT];
+            for(int r = 0; r < Game.HEIGHT; ++r)
+            {
+                grdBoardRows[r] = new RowDefinition();
+                grdBoardRows[r].Height = new GridLength(rowHeight);
+                grdBoard.RowDefinitions.Add(grdBoardRows[r]);
+            }
+
+            ColumnDefinition[] grdBoardCols = new ColumnDefinition[Game.WIDTH];
+            for(int c = 0; c < Game.WIDTH; ++c)
+            {
+                grdBoardCols[c] = new ColumnDefinition();
+                grdBoardCols[c].Width = new GridLength(colWidth);
+                grdBoard.ColumnDefinitions.Add(grdBoardCols[c]);
+            }
+
+            grdBoardBorders = new Border[Game.HEIGHT, Game.WIDTH];
+            for(int r = 0; r < Game.HEIGHT; ++r)
+            {
+                for(int c = 0; c < Game.WIDTH; ++c)
+                {
+                    grdBoardBorders[r, c] = new Border();
+                    grdBoardBorders[r, c].Background = Brushes.White;
+                    Grid.SetRow(grdBoardBorders[r, c], r);
+                    Grid.SetColumn(grdBoardBorders[r, c], c);
+                    grdBoard.Children.Add(grdBoardBorders[r, c]);
+                }
+            }
         }
 
         private void moveSnake()
@@ -217,7 +257,7 @@ namespace SnakeWPF
                         //Console.WriteLine("GAME OVER!");
                         game = null;
                         MessageBox.Show("Game Over!\nPoints: " + points, "Snake Game");
-                        records.Add(new Record("Player123", points, DateTime.Now));
+                        records.Add(new Record(playerName, points, DateTime.Now));
                         records.Sort(new RecordsComparer());
                         while(records.Count > 10)
                         {
@@ -241,6 +281,30 @@ namespace SnakeWPF
             }
         }
 
+        public static void serializeSettings()
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream fileStream = new FileStream(settingsFilePath, FileMode.Create);
+            List<object> settings = new List<object>();
+            settings.Add(Game.WIDTH);
+            settings.Add(Game.HEIGHT);
+            settings.Add(playerName);
+            formatter.Serialize(fileStream, settings);
+            fileStream.Close();
+        }
+
+        public static void deserializeSettings()
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream fileStream = new FileStream(settingsFilePath, FileMode.Open);
+            List<object> settings = new List<object>();
+            settings = formatter.Deserialize(fileStream) as List<object>;
+            Game.WIDTH = (int) settings.ElementAt(0);
+            Game.HEIGHT = (int) settings.ElementAt(1);
+            playerName = (String) settings.ElementAt(2);
+            fileStream.Close();
+        }   
+
         private void serializeRecords()
         {
             BinaryFormatter formatter = new BinaryFormatter();
@@ -254,8 +318,7 @@ namespace SnakeWPF
             BinaryFormatter formatter = new BinaryFormatter();
             FileStream fileStream = new FileStream(recordsFilePath, FileMode.Open);
             records = formatter.Deserialize(fileStream) as List<Record>;
-            fileStream.Close();
-            
+            fileStream.Close();        
         }
 
         private void gameTimerElaspsed(object sender, EventArgs e)
@@ -283,7 +346,7 @@ namespace SnakeWPF
             }
         }
 
-        private void keyboardTimerElaspsed(object sender, EventArgs e)
+        private void updateTimerElaspsed(object sender, EventArgs e)
         {
             if(game != null)
             {
@@ -292,6 +355,9 @@ namespace SnakeWPF
                 if(Keyboard.IsKeyDown(Key.S)) game.snakeHead.rot = 3;
                 if(Keyboard.IsKeyDown(Key.D)) game.snakeHead.rot = 4;
             }
+
+            Canvas.SetLeft(pointsLabel, Game.WIDTH * colWidth + 10);
+            /*if(mnuTop.Width != winMain.Width)*/ mnuTop.Width = winMain.Width;
         }
 
         private void mitFileNewGame_Click(object sender, RoutedEventArgs e)
@@ -336,7 +402,15 @@ namespace SnakeWPF
    
         private void mitFileSettings_Click(object sender, RoutedEventArgs e)
         {
-            if(setWindow.IsActive) setWindow.Close(); else setWindow.Show();
+            if(setWindow.IsLoaded)
+            {
+                setWindow.Close();
+            }
+            else
+            {
+                setWindow = new SettingsWindow();
+                setWindow.Show();
+            }
         }
     
         private void windowClosed(object sender, EventArgs e)

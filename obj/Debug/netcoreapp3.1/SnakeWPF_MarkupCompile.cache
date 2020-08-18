@@ -1,20 +1,20 @@
 ﻿SnakeWPF
-
+1.0.0.0
 
 winexe
 C#
 .cs
-D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\
+d:\Hubert\Zabawy programistyczne\C#\SnakeWPF\obj\Debug\netcoreapp3.1\
 SnakeWPF
 none
 false
 TRACE;DEBUG;NETCOREAPP;NETCOREAPP3_1
-D:\Hubert\Zabawy programistyczne\C#\SnakeWPF\App.xaml
-2-153897536
+d:\Hubert\Zabawy programistyczne\C#\SnakeWPF\App.xaml
+21397482308
 
-61772240695
-192-466752475
+81789433825
+192674553305
 MainWindow.xaml;SettingsWindow.xaml;
 
-False
+True
 

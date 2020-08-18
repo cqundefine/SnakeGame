@@ -20,6 +20,7 @@
           "netcoreapp3.1"
         ],
         "sources": {
+          "C:\\Users\\hubci\\AppData\\Roaming\\NuGet\\System.Windows.Forms": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

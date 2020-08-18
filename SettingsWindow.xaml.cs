@@ -21,6 +21,8 @@ namespace SnakeWPF
     public partial class SettingsWindow : Window
     {
         private TextBox boardWidthInput;
+        private TextBox boardHeightInput;
+        private TextBox playerNameInput;
 
         public SettingsWindow()
         {
@@ -64,15 +66,15 @@ namespace SnakeWPF
             int colsAmount = 2;
 
             Grid grdSet = new Grid();
-            Canvas.SetTop(grdSet, 0);
-            Canvas.SetLeft(grdSet, 0);
+            Canvas.SetTop(grdSet, 5);
+            Canvas.SetLeft(grdSet, 5);
             cnvMain.Children.Add(grdSet);
 
             RowDefinition[] rows = new RowDefinition[rowsAmount];
             for(int i = 0; i < rowsAmount; i++)
             {
                 rows[i] = new RowDefinition();
-                rows[i].Height = new GridLength(25);
+                rows[i].Height = new GridLength(26);
                 grdSet.RowDefinitions.Add(rows[i]);
             }
             
@@ -80,7 +82,7 @@ namespace SnakeWPF
             for(int i = 0; i < colsAmount; i++)
             {
                 cols[i] = new ColumnDefinition();
-                cols[i].Width = new GridLength(200);
+                cols[i].Width = new GridLength(185);
                 grdSet.ColumnDefinitions.Add(cols[i]);
             }
 
@@ -91,10 +93,40 @@ namespace SnakeWPF
             grdSet.Children.Add(lblBoardWidth);
 
             boardWidthInput = new TextBox();
+            boardWidthInput.Text = Game.WIDTH.ToString();
             boardWidthInput.TextChanged += boardWidthInput_TextChanged;
+            boardWidthInput.Height = 20;
             Grid.SetRow(boardWidthInput, 0);
             Grid.SetColumn(boardWidthInput, 1);
             grdSet.Children.Add(boardWidthInput);
+            
+            Label lblBoardHeight = new Label();
+            lblBoardHeight.Content = "Board Height";
+            Grid.SetRow(lblBoardHeight, 1);
+            Grid.SetColumn(lblBoardHeight, 0);
+            grdSet.Children.Add(lblBoardHeight);
+
+            boardHeightInput = new TextBox();
+            boardHeightInput.Text = Game.HEIGHT.ToString();
+            boardHeightInput.TextChanged += boardHeightInput_TextChanged;
+            boardHeightInput.Height = 20;
+            Grid.SetRow(boardHeightInput, 1);
+            Grid.SetColumn(boardHeightInput, 1);
+            grdSet.Children.Add(boardHeightInput);
+            
+            Label lblPlayerName = new Label();
+            lblPlayerName.Content = "Player Name";
+            Grid.SetRow(lblPlayerName, 2);
+            Grid.SetColumn(lblPlayerName, 0);
+            grdSet.Children.Add(lblPlayerName);
+
+            playerNameInput = new TextBox();
+            playerNameInput.Text = MainWindow.playerName;
+            playerNameInput.TextChanged += playerNameInput_TextChanged;
+            playerNameInput.Height = 20;
+            Grid.SetRow(playerNameInput, 2);
+            Grid.SetColumn(playerNameInput, 1);
+            grdSet.Children.Add(playerNameInput);
         }
 
         private void boardWidthInput_TextChanged(object sender, RoutedEventArgs e)
@@ -102,6 +134,23 @@ namespace SnakeWPF
             Int16 parseOut = new Int16();
             Int16.TryParse(boardWidthInput.Text, out parseOut);
             Game.WIDTH = parseOut;
+            MainWindow.reInitGrid();
+            MainWindow.serializeSettings();
+        }
+        
+        private void boardHeightInput_TextChanged(object sender, RoutedEventArgs e)
+        {
+            Int16 parseOut = new Int16();
+            Int16.TryParse(boardWidthInput.Text, out parseOut);
+            Game.HEIGHT = parseOut;
+            MainWindow.reInitGrid();
+            MainWindow.serializeSettings();
+        }
+
+        private void playerNameInput_TextChanged(object sender, RoutedEventArgs e)
+        {
+            MainWindow.playerName = playerNameInput.Text;
+            MainWindow.serializeSettings();
         }
     }
 }
